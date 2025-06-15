@@ -83,4 +83,18 @@ UserSchema.methods.generateAccessToken =  function(){
    }
 }
 
+UserSchema.methods.generateRefreshToken = function (){
+    const secret = process.env.REFRESH_TOKEN_KEY
+    const expiry = process.env.REFRESH_TOKEN_EXPIRY
+    
+    if(!secret){
+        throw new ApiError(500 , false,"Refresh token key not found")
+    }
+    if(!expiry) {
+        throw new ApiError(500 , false,"Refresh token expiry not found")
+    }
+
+    
+}
+
 export const User = mongoose.model("user",UserSchema)
