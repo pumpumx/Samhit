@@ -1,11 +1,12 @@
 class ApiError extends Error {
-    status: Number
-    success:string
-    constructor(status: Number, sucess: string = "", message: (string | undefined), stack: string = "") {
+    status: number
+    override stack?: string | undefined
+    success?:boolean
+    constructor(status: number, success: boolean=false, message?: string , stack?: string ) {
         super(message)
         this.status = status
-        this.success=sucess
-        if (stack) {
+        this.success=success
+        if (stack) {    
              this.stack = stack
         }
         else {

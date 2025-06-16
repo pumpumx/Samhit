@@ -94,7 +94,14 @@ UserSchema.methods.generateRefreshToken = function (){
         throw new ApiError(500 , false,"Refresh token expiry not found")
     }
 
+    const refreshToken = jwt.sign({
+        id: this._id,
+        username:this.username
+    },secret as Secret, {expiresIn:expiry || "8d" })
+
+    if(!refreshToken) throw new ApiError(500 , false, "Refresh token didnt generated")
     
+    return refreshToken;
 }
 
 export const User = mongoose.model("user",UserSchema)
