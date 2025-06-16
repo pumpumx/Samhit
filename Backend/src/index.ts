@@ -5,12 +5,9 @@ import path from 'path'
 import { appPortMethod } from './types/env.type.ts';
 
 const envPath = path.resolve("/home/pumpum/coding/WeTalk/Backend/src","../.env")
-console.log("upppp",envPath)
 dotenv.config({
     path:envPath,
 })
-
-
 
 databaseConnection()
 .then(()=>{

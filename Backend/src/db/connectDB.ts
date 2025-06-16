@@ -1,6 +1,4 @@
 import mongoose from "mongoose";
-import { ApiError } from "../utils/ApiError.ts";
-
 export const databaseConnection = async () => {
     try {
         const mongoUri:(string | undefined) = process.env.MONGODB_URL
