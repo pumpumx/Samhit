@@ -1,13 +1,11 @@
 import dotenv from 'dotenv'
 import { databaseConnection } from './db/connectDB.ts';
-import { app } from './app.ts';
 import path from 'path'
 import { serverInitialisation } from './Server/serverSetup.ts';
 const envPath:(string) = path.resolve("/home/pumpum/coding/WeTalk/Backend/src","../.env")
 dotenv.config({
     path:envPath,
 })
-
 
 databaseConnection()
 .then(()=>{
@@ -18,4 +16,4 @@ databaseConnection()
     }
 })
 
-export  const io = serverInitialisation() //Initialises the socket io server
+export const serverIo = await serverInitialisation() //Initialises the socket io server
