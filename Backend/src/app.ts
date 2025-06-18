@@ -1,4 +1,5 @@
 import express, { json, urlencoded } from "express";
+import type { Server } from "http";
 
 const app = express()
 
@@ -11,5 +12,4 @@ const app = express()
  }))
 
  //Routes functionality will come here
-
  export {app}

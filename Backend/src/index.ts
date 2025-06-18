@@ -2,22 +2,20 @@ import dotenv from 'dotenv'
 import { databaseConnection } from './db/connectDB.ts';
 import { app } from './app.ts';
 import path from 'path'
-import { appPortMethod } from './types/env.type.ts';
-
-const envPath = path.resolve("/home/pumpum/coding/WeTalk/Backend/src","../.env")
+import { serverInitialisation } from './Server/serverSetup.ts';
+const envPath:(string) = path.resolve("/home/pumpum/coding/WeTalk/Backend/src","../.env")
 dotenv.config({
     path:envPath,
 })
 
+
 databaseConnection()
 .then(()=>{
     try {
-        const appPort = appPortMethod()
-        if(!appPort) throw new Error("App port not available")
-        app.listen(appPort , '0.0.0.0' , ()=>{
-            console.log(`App running successfully on port ${appPort}`)
-    })
+        console.log("Database connected succesfully")
     } catch (error) {
-        throw new Error("Error while connecting app")
+        console.log(error)
     }
 })
+
+export  const io = serverInitialisation() //Initialises the socket io server
