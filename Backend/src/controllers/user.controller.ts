@@ -1,0 +1,54 @@
+
+import { ApiError } from '../utils/ApiError.ts'
+import { AsyncHandler } from '../utils/AsyncHandler'
+import { User } from '../models/User.model.ts'
+import bcrypt from 'bcryptjs'
+import { ApiResponse } from '../utils/ApiResponse.ts'
+
+
+const loginUser = AsyncHandler(async (req, res) => {
+
+    const { usernameOrEmail, password } = req.body;
+    const validateUsernameOrEmail: string = usernameOrEmail.trim();
+    const validatePassword: string = password;
+
+    if (typeof validateUsernameOrEmail !== 'string' || !validateUsernameOrEmail || validateUsernameOrEmail.length > 30) {
+        throw new ApiError(400, false, "Please enter a valid username")
+    }
+
+    if (!validatePassword) throw new ApiError(400, false, "Please enter a valid username")
+
+    const user = await User.findOne({
+        $or: [{ username: validateUsernameOrEmail, email: validateUsernameOrEmail }]
+    })
+
+    if (!user) throw new ApiError(400, false, "No such user exists")
+
+    const storedPassHash: string = user.password
+
+    const isPassCorrect: boolean = bcrypt.compareSync(validatePassword, storedPassHash)
+
+    if (isPassCorrect === false) throw new ApiError(500, false, "Incorrect password")
+
+    const accessToken = user.generateAccessToken()
+
+    return res
+        .status(200)
+        .cookie("accessToken", accessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "PRODUCTION",
+            sameSite: "lax"
+        })
+        .json(
+            new ApiResponse(200, "User Logged in Succcessfully", { user })
+        )
+})
+
+const registerUser = AsyncHandler(async(req , res)=>{
+    
+})
+
+export {
+    loginUser
+}
+

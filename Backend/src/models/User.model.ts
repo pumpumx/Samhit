@@ -15,6 +15,8 @@ const UserSchema = new mongoose.Schema<userSchemaType>({
         unique:true,
         required:true,
         trim:true,
+        min:6,
+        max:20,
         lowercase:true,
     },
     email:{
@@ -59,7 +61,7 @@ UserSchema.pre('save',function(next){
     next()
 })
 
-UserSchema.methods.generateAccessToken =  function(){
+UserSchema.methods.generateAccessToken =  function():string{
     try {
         const secret:(string | undefined) = process.env.ACCESS_TOKEN_KEY
         const expiry:(string | undefined ) = process.env.ACCESS_TOKEN_EXPIRY
@@ -83,7 +85,7 @@ UserSchema.methods.generateAccessToken =  function(){
    }
 }
 
-UserSchema.methods.generateRefreshToken = function (){
+UserSchema.methods.generateRefreshToken = function ():string{
     const secret = process.env.REFRESH_TOKEN_KEY
     const expiry = process.env.REFRESH_TOKEN_EXPIRY
     

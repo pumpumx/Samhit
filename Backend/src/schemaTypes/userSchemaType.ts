@@ -1,6 +1,6 @@
+import {Document} from "mongoose";
 
-
-export interface userSchemaType{
+export interface userSchemaType extends Document{
     fullname:string,
     username:string,
     email:string,
@@ -12,4 +12,6 @@ export interface userSchemaType{
     isVerified:boolean,
     isAvailable:boolean,   
     refreshToken:string,
+    generateAccessToken():string,
+    generateRefreshToken():string
 }

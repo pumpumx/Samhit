@@ -15,7 +15,7 @@ app.use(cookieParser())
  
 
  //Routes functionality will come here
-
-
+import userRouter from "./routes/user.route.ts";
+app.use('/api/v1/users/',userRouter)
  
  export {app}

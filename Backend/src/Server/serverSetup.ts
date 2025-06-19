@@ -1,7 +1,8 @@
 import { Server } from "socket.io";
 import { app } from "../app.ts";
 import http from 'http'
-let socketMap = new Map()
+
+export let socketMap = new Map()
 
 export async function serverInitialisation() {
     try {
@@ -25,7 +26,10 @@ export async function serverInitialisation() {
         io.on('connection',(socket)=>{
             console.log("User connected with socketId",socket.id)
             const accessToken = socket.handshake.auth
-            socketMap.set('0',socket.id)
+
+            //verify authentication method 
+            
+
             //All logic for message listeners
 
 
@@ -34,7 +38,7 @@ export async function serverInitialisation() {
         io.on('disconnect',(socket)=>{
             console.log("User disconnected with socket id",socket.id)
 
-            //Any logic when user disconnects
+            //Any logic when user disconnects 
 
 
 
