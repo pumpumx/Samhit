@@ -4,7 +4,7 @@ import { AsyncHandler } from '../utils/AsyncHandler'
 import { User } from '../models/User.model.ts'
 import bcrypt from 'bcryptjs'
 import { ApiResponse } from '../utils/ApiResponse.ts'
-
+import type { registerUser } from '../types/registerUser.type.ts'
 
 const loginUser = AsyncHandler(async (req, res) => {
 
@@ -45,7 +45,9 @@ const loginUser = AsyncHandler(async (req, res) => {
 })
 
 const registerUser = AsyncHandler(async(req , res)=>{
-    
+    const {
+        
+    }
 })
 
 export {
