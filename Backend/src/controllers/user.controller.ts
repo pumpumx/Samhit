@@ -4,11 +4,14 @@ import { AsyncHandler } from '../utils/AsyncHandler'
 import { User } from '../models/User.model.ts'
 import bcrypt from 'bcryptjs'
 import { ApiResponse } from '../utils/ApiResponse.ts'
-import type { registerUser } from '../types/registerUser.type.ts'
+import type { registerUserType } from '../types/registerUser.type.ts'
+import type { loginUserType } from '../types/loginUser.type.ts'
+import type { Response , Request } from 'express'
+import {isEmail , isAlpha} from 'validator'
+const loginUser = AsyncHandler(async (req:Request, res:Response) => {
 
-const loginUser = AsyncHandler(async (req, res) => {
+    const { usernameOrEmail, password }:loginUserType = req.body;
 
-    const { usernameOrEmail, password } = req.body;
     const validateUsernameOrEmail: string = usernameOrEmail.trim();
     const validatePassword: string = password;
 
@@ -45,12 +48,52 @@ const loginUser = AsyncHandler(async (req, res) => {
 })
 
 const registerUser = AsyncHandler(async(req , res)=>{
-    const {
-        
+    const {username,password,age,role,email,fullName}:registerUserType= req.body
+
+    if([username,password,role,email,fullName].some((val)=>!val?.trim())){
+        throw new ApiError(400,false,"All fields are required")
     }
+
+    if(username.length < 6) throw new ApiError(400,false,"Username length should be atleast 6 chars long")
+    
+    if(!isEmail(email)) throw new ApiError(400,false,"Invalid email format")
+
+    if(!isAlpha(fullName)) throw new ApiError(400,false,"Invalid full name format")
+
+    const user = new User({
+        username,
+        fullname:fullName,
+        age,
+        role,
+        password,
+        email,
+    })
+
+    await user.save()
+
+    const accessToken = user.generateAccessToken()
+    const refreshToken = user.generateRefreshToken()
+
+    user.refreshToken = refreshToken;
+    user.save({validateBeforeSave:false})
+
+    const options = {
+        httpOnly:true,
+        secure: process.env.PROD === 'PRODUCTION',
+        lax:"same-site"
+    }
+
+    return res
+    .status(200)
+    .cookie("accessToken",accessToken,options)
+    .json(
+        new ApiResponse(200,"User registered Successfully",{user})
+    )
+    
 })
 
 export {
-    loginUser
+    loginUser,
+    registerUser
 }
 

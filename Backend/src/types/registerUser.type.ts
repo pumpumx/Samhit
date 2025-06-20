@@ -1,9 +1,9 @@
 
-export interface registerUser{
+export interface registerUserType{
     fullName:string,
     username:string,
     email:string
     password:string,
     role:string,
-    age:string,
+    age:number,
 }
