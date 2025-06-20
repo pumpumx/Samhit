@@ -1,6 +1,8 @@
 import { Server } from "socket.io";
 import { app } from "../app.ts";
 import http from 'http'
+import jwt, { type JwtPayload, type Secret } from "jsonwebtoken";
+import { clientMessageHandler } from "./serverMessageHandler.ts";
 
 export let socketMap = new Map()
 
@@ -23,28 +25,35 @@ export async function serverInitialisation() {
         if (!io) throw new Error("Failed to initialise socket server")
 
 
-        io.on('connection',(socket)=>{
-            console.log("User connected with socketId",socket.id)
-            const accessToken = socket.handshake.auth
+        io.on('connection', (socket) => {
+            console.log("User connected with socketId", socket.id)
 
-            //verify authentication method 
-            
+            const accessToken: (string | any) = socket.handshake.auth    //verify authentication method 
+            const verifiedToken = jwt.verify(accessToken, process.env.ACCESS_TOKEN_KEY as Secret) as JwtPayload
+
+            socketMap.set(verifiedToken.username, socket.id)  //Sets the respective user with its socket id s
+
+            //Al message handler logic
+         
+            clientMessageHandler(socket)
 
             //All logic for message listeners
 
+            //Disconnect logic 
+            socket.on('disconnect', () => {
+                console.log("User disconnected with socket id", socket.id)
 
+                //Any logic when user disconnects 
+                //Removing user from socketMap
+                for(let [uID , sID] of socketMap){
+                    if(sID == socket.id){
+                        socketMap.delete(uID)
+                    }
+                }
+
+            })
         })
-
-        io.on('disconnect',(socket)=>{
-            console.log("User disconnected with socket id",socket.id)
-
-            //Any logic when user disconnects 
-
-
-
-        })
-
-
+        
         const appPort: (number | undefined) = Number(process.env.APP_PORT) || 3001
         if (!appPort) throw new Error("App port not available")
 
