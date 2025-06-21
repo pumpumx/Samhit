@@ -3,7 +3,7 @@ import type { userSchemaType } from "../schemaTypes/userSchemaType";
 import bcrypt from "bcryptjs";
 import jwt  from 'jsonwebtoken'
 import type { Secret } from "jsonwebtoken";
-import { ApiError } from "../utils/ApiError";
+import { ApiError } from "../utils/ApiError.ts";
 const UserSchema = new mongoose.Schema<userSchemaType>({
     fullname:{
         type:String,
@@ -20,7 +20,7 @@ const UserSchema = new mongoose.Schema<userSchemaType>({
         lowercase:true,
     },
     email:{
-        type:String,
+        type:String,    
         unique:true,
         required:true,
         trim:true,
@@ -74,7 +74,7 @@ UserSchema.methods.generateAccessToken =  function():string{
         }
 
         const accessToken =  jwt.sign({
-            id:this._id,
+            _id:this._id,
             username:this.username,
             email:this.email
         },secret as Secret,
@@ -98,7 +98,7 @@ UserSchema.methods.generateRefreshToken = function ():string{
     }
 
     const refreshToken = jwt.sign({
-        id: this._id,
+        _id: this._id,
         username:this.username
     },secret as Secret, {expiresIn:expiry || "8d" })
 

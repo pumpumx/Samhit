@@ -1,8 +1,9 @@
 import { Server } from "socket.io";
 import { app } from "../app.ts";
 import http from 'http'
-import jwt, { type JwtPayload, type Secret } from "jsonwebtoken";
 import { clientMessageHandler } from "./serverMessageHandler.ts";
+import jwt from 'jsonwebtoken';
+import type { Secret , JwtPayload } from 'jsonwebtoken';
 
 export let socketMap = new Map()
 
@@ -10,7 +11,7 @@ export async function serverInitialisation() {
     try {
         const server = http.createServer(app)
         const io = new Server(server, {
-            cors: {
+            cors: { 
                 origin: process.env.PROD === 'PRODUCTION' ? false : "*",
                 credentials: true
             },
@@ -28,10 +29,13 @@ export async function serverInitialisation() {
         io.on('connection', (socket) => {
             console.log("User connected with socketId", socket.id)
 
-            const accessToken: (string | any) = socket.handshake.auth    //verify authentication method 
-            const verifiedToken = jwt.verify(accessToken, process.env.ACCESS_TOKEN_KEY as Secret) as JwtPayload
+            //verify authentication method , Uncomment it to enable only authenticated socket io request
 
-            socketMap.set(verifiedToken.username, socket.id)  //Sets the respective user with its socket id s
+            // const accessToken: (string | any) = socket.handshake.auth    
+            // const verifiedToken = jwt .verify(accessToken, process.env.ACCESS_TOKEN_KEY as Secret) as JwtPayload
+
+            //Sets the respective user with its socket id s
+            // socketMap.set(verifiedToken.username, socket.id)  
 
             //Al message handler logic
          
@@ -48,6 +52,7 @@ export async function serverInitialisation() {
                 for(let [uID , sID] of socketMap){
                     if(sID == socket.id){
                         socketMap.delete(uID)
+                        console.log("user deleted from the socket Map")
                     }
                 }
 

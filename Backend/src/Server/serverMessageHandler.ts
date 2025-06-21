@@ -6,13 +6,17 @@ import { socketMap } from "./serverSetup.ts";
 export const clientMessageHandler = (socket:Socket)=>{
 
     socket.on('send_private_message',(data , username)=>{
-        var socketID:(string | string[]) = "";
-        for(let [uID , sID] of socketMap){
-            if(uID === username){
-                socketID = sID;
+        try {
+            var socketID:(string | string[]) = "";
+            for(let [uID , sID] of socketMap){
+                if(uID === username){
+                    socketID = sID;
+                }
             }
+            serverIo?.to(socketID).emit(data) 
+            console.log("Message sent successfully");
+        } catch (error) {
+            console.log("Error while sending private message" , error)
         }
-        serverIo?.to(socketID).emit(data) 
-        console.log("Message sent successfully");
     })
 }
