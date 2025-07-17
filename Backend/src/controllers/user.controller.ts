@@ -1,4 +1,3 @@
-
 import { ApiError } from '../utils/ApiError.ts'
 import { AsyncHandler } from '../utils/AsyncHandler.ts'
 import { User } from '../models/User.model.ts'
@@ -12,7 +11,7 @@ import isEmail from 'validator/lib/isEmail.js'
 
 interface CustomRequest extends Request{
     user?:any
-}
+}   
 
 const loginUser = AsyncHandler(async (req:Request, res:Response) => {
 
@@ -124,10 +123,11 @@ const deleteUserAccount = AsyncHandler(async (req:CustomRequest , res:Response)=
     )
 })
 
-
+    
 export {
     loginUser,
     registerUser,
     deleteUserAccount
 }
 
+ 
