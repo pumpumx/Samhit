@@ -5,7 +5,7 @@ import { clientMessageHandler } from "./serverMessageHandler.ts";
 import jwt from 'jsonwebtoken';
 import type { Secret , JwtPayload } from 'jsonwebtoken';
 
-export let socketMap = new Map()
+export let userSocketMap = new Map()
 
 export async function serverInitialisation() {
     try {
@@ -31,11 +31,12 @@ export async function serverInitialisation() {
 
             //verify authentication method , Uncomment it to enable only authenticated socket io request
 
-            // const accessToken: (string | any) = socket.handshake.auth    
-            // const verifiedToken = jwt .verify(accessToken, process.env.ACCESS_TOKEN_KEY as Secret) as JwtPayload
+            const accessToken: (string | any) = socket.handshake.auth
+            console.log("access Token",accessToken)    
+            const verifiedToken = jwt .verify(accessToken, process.env.ACCESS_TOKEN_KEY as Secret) as JwtPayload
 
-            //Sets the respective user with its socket id s
-            // socketMap.set(verifiedToken.username, socket.id)  
+            //Sets the respective user with its socket id 
+            userSocketMap.set(verifiedToken.username, socket.id)  
 
             //Al message handler logic
          
@@ -49,13 +50,12 @@ export async function serverInitialisation() {
 
                 //Any logic when user disconnects 
                 //Removing user from socketMap
-                for(let [uID , sID] of socketMap){
+                for(let [uID , sID] of userSocketMap){
                     if(sID == socket.id){
-                        socketMap.delete(uID)
+                        userSocketMap.delete(uID)
                         console.log("user deleted from the socket Map")
                     }
                 }
-
             })
         })
         

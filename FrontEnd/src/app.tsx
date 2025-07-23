@@ -1,4 +1,4 @@
-import { use, useEffect, useRef, useState, type ReactNode } from "react";
+import {  useEffect, useRef, useState } from "react";
 
 
 
@@ -54,7 +54,6 @@ export default function MainApp(){
             vidRef.current.srcObject = stream
         }
         setStream(stream)
-
     }
     streamSet()
         return ()=>{
