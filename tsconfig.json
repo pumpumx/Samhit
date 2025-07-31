@@ -29,7 +29,7 @@
   "include": [
     "**/*.ts",
     "**/*.tsx"
-  ],
+, "FrontEnd/src/context/SocketContext.tsz"  ],
   "exclude": [
     "node_modules"
   ]

@@ -48,6 +48,9 @@ export async function serverInitialisation() {
                 socket.join(data.roomId)
                 socket.to(data.roomId).emit(`${data.username} joined the room`)
                 console.log("roomId",data.roomId)
+
+                const usersInRoom = io.sockets.adapter.rooms.get(data.roomId)
+                console.log(usersInRoom)
             })
             //All message handler logic
          
