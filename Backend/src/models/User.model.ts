@@ -5,11 +5,6 @@ import jwt  from 'jsonwebtoken'
 import type { Secret } from "jsonwebtoken";
 import { ApiError } from "../utils/ApiError.ts";
 const UserSchema = new mongoose.Schema<userSchemaType>({
-    fullname:{
-        type:String,
-        required:true,
-
-    },
     username:{
         type:String,
         unique:true,
@@ -25,31 +20,12 @@ const UserSchema = new mongoose.Schema<userSchemaType>({
         required:true,
         trim:true,
     },
-    role:{
-        type:String,
-        enum:["User","Doctor","Admin"],
-        default:"User"
-    },
-    age: {
-        type:Number,
-    },
     password:{
         type:String,
         required:true,
     },
     avatar:{
         type:String,
-    },
-    bio:{
-        type:String,
-    },
-    isAvailable:{
-        type:Boolean,
-        default:true,
-    },
-    isVerified:{
-        type:Boolean,
-        default:false,
     },
     refreshToken:{
         type:String,

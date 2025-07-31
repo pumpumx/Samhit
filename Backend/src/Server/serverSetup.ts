@@ -7,6 +7,10 @@ import type { Secret , JwtPayload } from 'jsonwebtoken';
 
 export let userSocketMap = new Map()
 
+export interface clientData {
+    username:string,
+    roomId:string
+}
 export async function serverInitialisation() {
     try {
         const server = http.createServer(app)
@@ -31,14 +35,21 @@ export async function serverInitialisation() {
 
             //verify authentication method , Uncomment it to enable only authenticated socket io request
 
-            const accessToken: (string | any) = socket.handshake.auth
-            console.log("access Token",accessToken)    
-            const verifiedToken = jwt .verify(accessToken, process.env.ACCESS_TOKEN_KEY as Secret) as JwtPayload
+            // const accessToken: (string | any) = socket.handshake.auth
+            // console.log("access Token",accessToken)    
+            // const verifiedToken = jwt.verify(accessToken, process.env.ACCESS_TOKEN_KEY as Secret) as JwtPayload
 
             //Sets the respective user with its socket id 
-            userSocketMap.set(verifiedToken.username, socket.id)  
-
-            //Al message handler logic
+            // userSocketMap.set(verifiedToken.username, socket.id)  
+        
+            socket.on('send-user-info',(data:clientData)=>{
+                userSocketMap.set(data.username,socket.id)
+                console.log(data.username)
+                socket.join(data.roomId)
+                socket.to(data.roomId).emit(`${data.username} joined the room`)
+                console.log("roomId",data.roomId)
+            })
+            //All message handler logic
          
             clientMessageHandler(socket)
 

@@ -4,6 +4,7 @@ import './index.css'
 import MainApp from './app'
 import {createBrowserRouter , RouterProvider , Route ,createRoutesFromElements} from 'react-router-dom'
 import HomePage from './pages/Home'
+import GroupVideoCallUI from './pages/Main'
 
 const routes = createBrowserRouter(
   createRoutesFromElements(
@@ -11,6 +12,7 @@ const routes = createBrowserRouter(
   <Route>
     <Route path='/' element={<MainApp/>} />
     <Route path='/home' element={<HomePage/>} />
+    <Route path='/main' element={<GroupVideoCallUI/>} />
   </Route>
     </>
   )

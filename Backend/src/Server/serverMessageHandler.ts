@@ -1,6 +1,6 @@
 import type { Socket } from "socket.io";
 import { serverIo } from "../index.ts";
-import { userSocketMap } from "./serverSetup.ts";
+import { userSocketMap, type clientData } from "./serverSetup.ts";
 import { ApiError } from "../utils/ApiError.ts";
 
 
@@ -23,9 +23,10 @@ export const clientMessageHandler = (socket:(Socket | undefined))=>{
         }
     })
 
-    socket.on('join-room',(data)=>{
-        const {emailID , roomID} = data
-        socket.join(roomID)
-        socket.broadcast.to(roomID).emit("user-joined",{emailID})
+    socket.on('join-room-two',(data:clientData)=>{
+        const {username, roomId} = data
+        socket.join(roomId)
+        console.log("user ",username , "joined room" , roomId)
+        socket.broadcast.to(roomId).emit("user-joined",{username})
     })
 }
