@@ -1,8 +1,8 @@
 import {io, type Socket} from 'socket.io-client'
 
 export type clientData  = {
-    username:string ,
-    roomId:string 
+    username:string | undefined ,
+    roomId:string | undefined
 }
 let clientSocket:Socket | null = null;
 export const clientServerConnection = ()=>{

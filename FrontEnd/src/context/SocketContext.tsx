@@ -1,26 +1,29 @@
 import { createContext, useContext, useMemo } from "react"
-import { io } from "socket.io-client"
-import type { Socket } from "socket.io-client"
+import { io, Socket } from "socket.io-client"
 
+const SocketContext = createContext<Socket | null>(null)
 
-const SocketContext = createContext(null)
-
-
-export const useSocket = ()=>{
+export const useSocket = () => {
     return useContext(SocketContext) 
 }
 
-export const SockettProvider = (props:void)=>{
-    const socket = useMemo(
-        ()=>{
-            io("http://localhost:3000")
-        },
-        []
-    )
+export const SocketProvider = (props: { children: React.ReactNode }) => {
+    const socket = useMemo(() => io("http://localhost:3000"), [])
 
     return (
-        <SocketContext.Provider value={{socket}}>
+        <SocketContext.Provider value={socket}>
             {props.children}
         </SocketContext.Provider>
     )
 }
+
+
+export class PeerConnection{ //Class for handling webRTC connections 
+    constructor(){
+        return;
+    }
+
+    async SignalingConnection(){
+
+    }
+};

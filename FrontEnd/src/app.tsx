@@ -21,7 +21,7 @@ async function openCamera(cameraId:string,minHeight:ConstrainULong,minWidth:Cons
     })
 
     return connection;
- }
+}
 
 
 async function useCamera(){
@@ -53,7 +53,7 @@ export default function MainApp(){
         if(vidRef.current && stream){
             vidRef.current.srcObject = stream
         }
-        setStream(stream)
+        setStream(stream)   
     }
     streamSet()
         return ()=>{
