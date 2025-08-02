@@ -6,10 +6,18 @@ import jwt from 'jsonwebtoken';
 import type { Secret , JwtPayload } from 'jsonwebtoken';
 
 export let userSocketMap = new Map()
-
+export let socketUserMap = new Map()
 export interface clientData {
     username:string,
     roomId:string
+}
+interface offerData{
+    username:string,
+    offer:RTCSessionDescriptionInit
+}
+interface answerData {
+    fromEmail:string,
+    answer:RTCSessionDescriptionInit
 }
 export async function serverInitialisation() {
     try {
@@ -44,6 +52,7 @@ export async function serverInitialisation() {
         
             socket.on('send-user-info',(data:clientData)=>{
                 userSocketMap.set(data.username,socket.id)
+                socketUserMap.set(socket.id , data.username)
                 console.log(data.username)
                 socket.join(data.roomId)
                 socket.to(data.roomId).emit(`${data.username} joined the room`)
@@ -55,9 +64,21 @@ export async function serverInitialisation() {
             //All message handler logic
          
             clientMessageHandler(socket)
-
+            
+            socket.on('call-user',(offerData:offerData)=>{
+                const {username , offer} = offerData    
+                const fromUsername = socketUserMap.get(socket.id)
+                const toSendUsername = userSocketMap.get(username)
+                socket.to(toSendUsername).emit('incoming-call',{from:fromUsername , offer})
+                console.log("username at server ",username , offer)
+            })
             //All logic for message listeners
-
+            socket.on('send-answer',(data:answerData)=>{
+                const {fromEmail , answer} = data
+                const emailToSocket = userSocketMap.get(fromEmail)
+                const senderEmail = socketUserMap.get(socket.id)
+                socket.to(emailToSocket).emit('recieve-answer',{answerSenderEmail:senderEmail , answer:answer})
+            })
             //Disconnect logic 
             socket.on('disconnect', () => {
                 console.log("User disconnected with socket id", socket.id)

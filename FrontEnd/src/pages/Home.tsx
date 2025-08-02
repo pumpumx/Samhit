@@ -1,50 +1,54 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
-import { clientServerConnection, sendUserDetailsToTheServer } from '../socketServer'
-import { type clientData } from "../socketServer";
-import { userStore } from "@/stores/user.store";
-import { Navigate, useNavigate } from "react-router-dom";
+import { userStore, useUserProfile } from "@/stores/user.store";
+import { useNavigate } from "react-router-dom";
+import { useSocket } from "@/stores/socket.store";
 
 const uniqueIdGenerator = (): string => {
 
   const randomId: string | undefined = Math.floor(Math.random() * 1e9) + 1 as unknown as string
 
-  if (randomId) return randomId
+  if (randomId) return randomId                                                       
   return " "
 }
 export default function HomePage() {
   const cardRef = useRef(null);
-  const [username, setUsername] = useState<string | undefined>()  //later on can apply bloom filter to check for the possibility of a preexisting username 
+  const username = useUserProfile((state)=>state.username)
+  const changeUsername = useUserProfile((state)=>state.setUsername)  //later on can apply bloom filter to check for the possibility of a preexisting username 
   const [roomId, setRoomID] = useState<string | undefined>()
   const addUser = userStore((state) => state.insertUserIntoUserList)
   const navigate = useNavigate()
 
+  const socket = useSocket((state)=>state.clientSocket)
+  const createSocket = useSocket((state)=>state.initiateSocketConnection)
   const onValidJoinIntoTheRoom = () => { //Validate if user is trying to enter an unauthorized room !! in future , for the time being just redirect and add it into global user array
     try {
+      console.log("in valid join room")
+      socket?.emit('send-user-info',{username , roomId})
+
       if (username && roomId) {
         const uniqueId = uniqueIdGenerator()
         console.log(uniqueId)
         addUser(uniqueId, username, roomId)
-        navigate('/main')
+        navigate(`/room/${roomId}`)
       }
     } catch (error) {
       console.log("error at onValidJoinIntoTheRoom function",error)
     }
   }
 
-
-  const data: clientData = {
-    username,
-    roomId
-
-  }
+  
   useEffect(() => {
+    createSocket()
     gsap.fromTo(
       cardRef.current,
       { opacity: 0, y: 20 },
       { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }
     );
-    clientServerConnection()
+
+    return ()=>{
+      
+    }
   }, []);
 
   return (
@@ -62,7 +66,7 @@ export default function HomePage() {
               Username
             </label>
             <input
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={(e) => changeUsername(e.target.value)}
               value={username as string}
               id="email"
               type="text"
@@ -86,7 +90,6 @@ export default function HomePage() {
           <button
             type="button"
             onClick={() => {
-              sendUserDetailsToTheServer(data)
               onValidJoinIntoTheRoom()
             }}
             className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors"

@@ -7,12 +7,11 @@ import HomePage from './pages/Home'
 import GroupVideoCallUI from './pages/Main'
 
 const routes = createBrowserRouter(
-  createRoutesFromElements(
+  createRoutesFromElements(           
     <>
   <Route>
-    <Route path='/' element={<MainApp/>} />
-    <Route path='/home' element={<HomePage/>} />
-    <Route path='/main' element={<GroupVideoCallUI/>} />
+    <Route path='/' element={<HomePage/>} />
+    <Route path='/room/:roomId' element={<GroupVideoCallUI/>} />
   </Route>
     </>
   )
