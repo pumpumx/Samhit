@@ -8,7 +8,7 @@ interface callData{
     offer:RTCSessionDescriptionInit
 }
 interface answerData{
-    fromEmail:string,
+    answerSenderEmail:string,
     answer:RTCSessionDescriptionInit
 }
 async function openUserMic(value: boolean) {
@@ -79,25 +79,27 @@ export default function GroupVideoCallUI() {
     const vidRef = useRef<HTMLVideoElement | null>(null)
 
     const handleOffer = useCallback(async() => {
-        const offer = usePeer.getState().createOffer()
+        const offer = await usePeer.getState().createOffer()
         socket?.emit('call-user',{username,offer})
         console.log('incoming call',offer)
     },[socket])
 
     
-    const handleIncomingCall = useCallback((data:callData)=>{ //If you want to decline the answer -> two options either cut the call like send a false flag and don't create an answer at all or don't let user join the room until unless authorized
+    const handleIncomingCall = useCallback(async (data:callData)=>{ //If you want to decline the answer -> two options either cut the call like send a false flag and don't create an answer at all or don't let user join the room until unless authorized
         const { fromEmail , offer} = data
-        const answer = usePeer.getState().createAnswer(offer) 
+        const answer = await usePeer.getState().createAnswer(offer) 
         console.log("answer",answer)
         socket?.emit('send-answer',{fromEmail , answer})
     },[])
 
-    const recieveAnswer = useCallback(async(data:answerData)=>{
-        const { fromEmail , answer}=data
+    const recieveAnswer = useCallback(async(data:answerData)=>{ //Responsible for recieving the answer to initiate the rtc procedure
+        const { answerSenderEmail , answer}=data
         const peer = usePeer.getState().peer
-        console.log("answer",answer)
+        console.log("answer recieved",answer)
         await peer.setRemoteDescription(answer)
     },[])
+
+    
     useEffect(() => {
         console.log(userArray)
         const streamSet = async () => {
@@ -109,6 +111,7 @@ export default function GroupVideoCallUI() {
         }
         streamSet()
         handleOffer()
+        //Used to listen to certain events
         socket?.on('incoming-call',handleIncomingCall)
         socket?.on('recieve-answer',recieveAnswer)
         return () => {
@@ -124,7 +127,7 @@ export default function GroupVideoCallUI() {
         <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6">
             <h1 className="text-3xl font-bold mb-6 text-center tracking-tight">Group Video Call</h1>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {userArray.map((user, index) => (
+                {userArray.map((user) => (
                     <div
                         key={user.id}
                         className="bg-white/10 backdrop-blur-md rounded-2xl shadow-xl overflow-hidden flex flex-col items-center justify-center h-60 transition hover:scale-105 duration-300 border border-white/20"

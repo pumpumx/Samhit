@@ -7,11 +7,11 @@ interface socketInterface {
 }
 
 
-export const useSocket = create<socketInterface>((set,get)=>({
+export const useSocket = create<socketInterface>((set)=>({
     clientSocket:null,
     initiateSocketConnection:async ()=>{
         try {
-            const socket = await io('http://localhost:3000',{
+            const socket =  io('http://localhost:3000',{
                 reconnectionAttempts:5
             }) 
              set({clientSocket:socket})

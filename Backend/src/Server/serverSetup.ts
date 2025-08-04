@@ -51,15 +51,15 @@ export async function serverInitialisation() {
             // userSocketMap.set(verifiedToken.username, socket.id)  
         
             socket.on('send-user-info',(data:clientData)=>{
-                userSocketMap.set(data.username,socket.id)
-                socketUserMap.set(socket.id , data.username)
-                console.log(data.username)
-                socket.join(data.roomId)
+                userSocketMap.set(data.username,socket.id) //Sets the username to socket ID
+                socketUserMap.set(socket.id , data.username) //Sets the socket id to username
+
+                socket.join(data.roomId) //Responsible for making user join respective rooms
+                
                 socket.to(data.roomId).emit(`${data.username} joined the room`)
-                console.log("roomId",data.roomId)
 
                 const usersInRoom = io.sockets.adapter.rooms.get(data.roomId)
-                console.log(usersInRoom)
+                console.log("All users in this specific room" , usersInRoom)
             })
             //All message handler logic
          
@@ -69,7 +69,7 @@ export async function serverInitialisation() {
                 const {username , offer} = offerData    
                 const fromUsername = socketUserMap.get(socket.id)
                 const toSendUsername = userSocketMap.get(username)
-                socket.to(toSendUsername).emit('incoming-call',{from:fromUsername , offer})
+                socket.emit('incoming-call',{from:fromUsername , offer})
                 console.log("username at server ",username , offer)
             })
             //All logic for message listeners
@@ -77,7 +77,9 @@ export async function serverInitialisation() {
                 const {fromEmail , answer} = data
                 const emailToSocket = userSocketMap.get(fromEmail)
                 const senderEmail = socketUserMap.get(socket.id)
-                socket.to(emailToSocket).emit('recieve-answer',{answerSenderEmail:senderEmail , answer:answer})
+                socket.emit('recieve-answer',{answerSenderEmail:senderEmail , answer:answer})
+
+                console.log("inside send-answer" , answer)
             })
             //Disconnect logic 
             socket.on('disconnect', () => {
