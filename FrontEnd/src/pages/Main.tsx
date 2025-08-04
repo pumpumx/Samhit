@@ -4,11 +4,11 @@ import { useSocket } from "@/stores/socket.store";
 import { usePeer } from "@/stores/peer.store";
 
 interface callData{
-    fromEmail:string,
+    userRoom:string,
     offer:RTCSessionDescriptionInit
 }
 interface answerData{
-    answerSenderEmail:string,
+    userRoom:string,
     answer:RTCSessionDescriptionInit
 }
 async function openUserMic(value: boolean) {
@@ -72,34 +72,56 @@ export default function GroupVideoCallUI() {
     const socket = useSocket((state)=>state.clientSocket)
     const peer = usePeer()
 
-    const userArray = userStore((state) => state.Users)
-    const username = useUserProfile((state)=>state.username)
+    const [UsernameWithWhomToConnect , setUsername] = useState<string | null>("") //If making the rtc connection peer to peer 
+    const userArray = userStore((state) => state.Users) //Make it persist
+    const username = useUserProfile((state)=>state.username) 
+    const userRoom = userStore((state)=>state.getUserRoom(username))   
     const [streamVid, setStream] = useState<MediaStream | null>(null)
     const [camState, setCamState] = useState<boolean>(true);
     const vidRef = useRef<HTMLVideoElement | null>(null)
 
     const handleOffer = useCallback(async() => {
+        const peer = usePeer.getState().peer
+
+         peer.onicecandidate = (e:RTCPeerConnectionIceEvent) =>{
+            if(e.candidate){
+                const iceCandidate = e.candidate
+                console.log("ice candi" , iceCandidate)
+                socket?.emit('ice-candidate',({iceCandidate , userRoom}))
+            }
+        }
+
         const offer = await usePeer.getState().createOffer()
-        socket?.emit('call-user',{username,offer})
-        console.log('incoming call',offer)
+
+       
+        socket?.emit('call-user',{userRoom,offer}) //The userRoom to whom the offer will go , We need to provide the username
+        console.log("user room at client" , userRoom)
     },[socket])
 
     
     const handleIncomingCall = useCallback(async (data:callData)=>{ //If you want to decline the answer -> two options either cut the call like send a false flag and don't create an answer at all or don't let user join the room until unless authorized
-        const { fromEmail , offer} = data
+        const { userRoom , offer} = data
         const answer = await usePeer.getState().createAnswer(offer) 
-        console.log("answer",answer)
-        socket?.emit('send-answer',{fromEmail , answer})
+        socket?.emit('send-answer',{userRoom , answer}) //fromusername -> The user who sent me the offer
+        console.log("request sent for an answer",userRoom , answer)
     },[])
 
     const recieveAnswer = useCallback(async(data:answerData)=>{ //Responsible for recieving the answer to initiate the rtc procedure
-        const { answerSenderEmail , answer}=data
+        const { userRoom , answer}=data
         const peer = usePeer.getState().peer
-        console.log("answer recieved",answer)
-        await peer.setRemoteDescription(answer)
+        console.log("recieved answer",answer) //Everything's working fine
+        await peer.setRemoteDescription(answer) //?? will this set up the connection let me confirm
+         console.log("connection state "  , peer.connectionState)
+        
     },[])
 
-    
+    const addCandidate = useCallback(async(iceCandidate:RTCIceCandidateInit)=>{
+        const peer = usePeer.getState().peer
+        await peer.addIceCandidate(new RTCIceCandidate(iceCandidate))
+        console.log("connection state "  , peer.connectionState)
+        
+    },[])
+
     useEffect(() => {
         console.log(userArray)
         const streamSet = async () => {
@@ -114,6 +136,9 @@ export default function GroupVideoCallUI() {
         //Used to listen to certain events
         socket?.on('incoming-call',handleIncomingCall)
         socket?.on('recieve-answer',recieveAnswer)
+        socket?.on('available-candidate',addCandidate)
+
+        
         return () => {
             if (streamVid) {
                 console.log(streamVid.getTracks())

@@ -1,7 +1,6 @@
 import { Server } from "socket.io";
 import { app } from "../app.ts";
 import http from 'http'
-import { clientMessageHandler } from "./serverMessageHandler.ts";
 import jwt from 'jsonwebtoken';
 import type { Secret , JwtPayload } from 'jsonwebtoken';
 
@@ -12,12 +11,16 @@ export interface clientData {
     roomId:string
 }
 interface offerData{
-    username:string,
+    userRoom:string,
     offer:RTCSessionDescriptionInit
 }
 interface answerData {
-    fromEmail:string,
+    userRoom:string,
     answer:RTCSessionDescriptionInit
+}
+interface iceCandidates {
+    iceCandidate:RTCIceCandidateInit,
+    userRoom:string
 }
 export async function serverInitialisation() {
     try {
@@ -61,25 +64,32 @@ export async function serverInitialisation() {
                 const usersInRoom = io.sockets.adapter.rooms.get(data.roomId)
                 console.log("All users in this specific room" , usersInRoom)
             })
+
             //All message handler logic
          
-            clientMessageHandler(socket)
-            
-            socket.on('call-user',(offerData:offerData)=>{
-                const {username , offer} = offerData    
-                const fromUsername = socketUserMap.get(socket.id)
-                const toSendUsername = userSocketMap.get(username)
-                socket.emit('incoming-call',{from:fromUsername , offer})
-                console.log("username at server ",username , offer)
+            socket.on('call-user',(offerData:offerData)=>{ //As soon as the user joins it sends the web rtc call to the other user in the room
+                const {userRoom , offer} = offerData    
+                const fromUsername = socketUserMap.get(socket.id) //The person sending the offer username
+                // const toSendUsername = userSocketMap.get(username) //The person whom the offer will go , username. This field required from the client
+                console.log("user room " ,userRoom)
+                socket.to(userRoom).emit('incoming-call',{userRoom , offer}) //Sends the offer to the designated user
             })
-            //All logic for message listeners
-            socket.on('send-answer',(data:answerData)=>{
-                const {fromEmail , answer} = data
-                const emailToSocket = userSocketMap.get(fromEmail)
-                const senderEmail = socketUserMap.get(socket.id)
-                socket.emit('recieve-answer',{answerSenderEmail:senderEmail , answer:answer})
+            
+            //Responsible for sending web RTC answer
+            socket.on('send-answer',(data:answerData)=>{ //On send answer event the answer comes from The user
+                const {userRoom , answer} = data
+                // const socketId_of_the_reciever = userSocketMap.get(fromUserRoom)
+                const senderEmail = socketUserMap.get(socket.id) //The one who sent the answer
+                console.log("recieved answer" , userRoom , answer)
+                socket.to(userRoom).emit('recieve-answer',{userRoom , answer})
+                console.log("answer")
+            })
 
-                console.log("inside send-answer" , answer)
+            //Exchanging ice-candidates 
+            socket.on('ice-candidate',(data:iceCandidates)=>{
+                const {iceCandidate , userRoom} = data
+                console.log("ice candidate" , iceCandidate)
+                socket.to(userRoom).emit("available-candidate",(iceCandidate));
             })
             //Disconnect logic 
             socket.on('disconnect', () => {

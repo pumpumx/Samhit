@@ -14,7 +14,6 @@ export const usePeer = create<peerInterface>((set,get)=>({
             const peer = get().peer
             const offer = await peer.createOffer() 
             await peer.setLocalDescription(offer)
-            console.log("gettng peer " , offer)
             return offer
         } catch (error) {
             console.log("error at create error" , error)
@@ -25,7 +24,7 @@ export const usePeer = create<peerInterface>((set,get)=>({
         try {
             const peer = get().peer
             await peer.setRemoteDescription(offer)
-            const answer = await peer.createAnswer()
+            const answer = await peer.createAnswer();
             await peer.setLocalDescription(answer)
             return answer
         } catch (error) {
