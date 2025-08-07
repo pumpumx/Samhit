@@ -1,36 +1,32 @@
-import {create} from 'zustand'
+import { create } from 'zustand'
+import { useSocket } from './socket.store'
 
-interface peerInterface{
-    peer:RTCPeerConnection,
-    createOffer:()=>Promise<RTCSessionDescriptionInit | null>,
-    createAnswer:(offer:RTCSessionDescriptionInit)=>Promise<RTCSessionDescriptionInit | null>
+interface peerInterface {
+    createOffer: (peer:RTCPeerConnection | null) => Promise<RTCSessionDescriptionInit | null | undefined>,
+    createAnswer: (offer: RTCSessionDescriptionInit , peer:RTCPeerConnection | null) => Promise<RTCSessionDescriptionInit | null | undefined>
 }
 
 
-export const usePeer = create<peerInterface>((set,get)=>({
-    peer:new RTCPeerConnection({iceServers:[{'urls': 'stun:stun.l.google.com:19302'}]}),
-    createOffer:async ()=>{
+export const usePeer = create<peerInterface>((set, get) => ({
+    createOffer: async (peer:RTCPeerConnection | null) => {
         try {
-            const peer = get().peer
-            const offer = await peer.createOffer() 
-            await peer.setLocalDescription(offer)
+            const offer = await peer?.createOffer()
+            await peer?.setLocalDescription(offer)
             return offer
         } catch (error) {
-            console.log("error at create error" , error)
+            console.log("error at create error", error)
             return null
         }
     },
-    createAnswer:async (offer:RTCSessionDescriptionInit)=>{
+    createAnswer: async (offer: RTCSessionDescriptionInit , peer:RTCPeerConnection | null) => {
         try {
-            const peer = get().peer
-            await peer.setRemoteDescription(offer)
-            const answer = await peer.createAnswer();
-            await peer.setLocalDescription(answer)
+            await peer?.setRemoteDescription(new RTCSessionDescription(offer))
+            const answer = await peer?.createAnswer();
+            await peer?.setLocalDescription(answer)
             return answer
         } catch (error) {
-            console.log("error while creating rtc answer",error)
+            console.log("error while creating rtc answer", error)
             return null
         }
     }
-
 }))

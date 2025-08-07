@@ -18,6 +18,7 @@ interface answerData {
     userRoom:string,
     answer:RTCSessionDescriptionInit
 }
+
 interface iceCandidates {
     iceCandidate:RTCIceCandidateInit,
     userRoom:string
@@ -74,7 +75,7 @@ export async function serverInitialisation() {
                 console.log("user room " ,userRoom)
                 socket.to(userRoom).emit('incoming-call',{userRoom , offer}) //Sends the offer to the designated user
             })
-            
+
             //Responsible for sending web RTC answer
             socket.on('send-answer',(data:answerData)=>{ //On send answer event the answer comes from The user
                 const {userRoom , answer} = data
@@ -88,7 +89,7 @@ export async function serverInitialisation() {
             //Exchanging ice-candidates 
             socket.on('ice-candidate',(data:iceCandidates)=>{
                 const {iceCandidate , userRoom} = data
-                console.log("ice candidate" , iceCandidate)
+                console.log("ice candidate" , iceCandidate , userRoom)
                 socket.to(userRoom).emit("available-candidate",(iceCandidate));
             })
             //Disconnect logic 
@@ -97,14 +98,15 @@ export async function serverInitialisation() {
 
                 //Any logic when user disconnects 
                 //Removing user from socketMap
-                for(let [uID , sID] of userSocketMap){
-                    if(sID == socket.id){
-                        userSocketMap.delete(uID)
-                        console.log("user deleted from the socket Map")
-                    }
+                const username = socketUserMap.get(socket.id)
+
+                if(username){
+                    userSocketMap.delete(username)    
+                    console.log("user deleted from userSocketMap")  
                 }
+                socketUserMap.delete(socket.id)
             })
-        })
+        })  
         
         const appPort: (number | undefined) = Number(process.env.APP_PORT) || 3001
         if (!appPort) throw new Error("App port not available")
