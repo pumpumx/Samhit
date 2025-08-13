@@ -18,7 +18,7 @@ async function openUserMic(value: boolean) {
             'audio': value
         }
         return navigator.mediaDevices.getUserMedia(constraints)
-    } catch (error) {
+    } catch (error) {   
         console.log("Error at audio", error)
     }
 }
