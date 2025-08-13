@@ -4,7 +4,18 @@ import bcrypt from "bcryptjs";
 import jwt  from 'jsonwebtoken'
 import type { Secret } from "jsonwebtoken";
 import { ApiError } from "../utils/ApiError.ts";
+
 const UserSchema = new mongoose.Schema<userSchemaType>({
+    fullname:{
+        type:String,
+        trim:true,
+        required:true,
+    },
+    accountType:{
+        type:String,
+        enum:["Client" , "Consultant"],
+        default:"Client"
+    },
     username:{
         type:String,
         unique:true,
@@ -24,11 +35,22 @@ const UserSchema = new mongoose.Schema<userSchemaType>({
         type:String,
         required:true,
     },
+    bio:{
+        type:String,
+    },
     avatar:{
         type:String,
     },
     refreshToken:{
         type:String,
+    },
+    isVerified:{
+        type:Boolean,
+        default:false,
+    },
+    isAvailable:{
+        type:Boolean,
+        default:true,
     }
 })  
 
