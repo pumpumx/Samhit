@@ -4,7 +4,7 @@ import { Room } from "./socketRoom.ts";
 import { socketUser } from "./socketUser.ts";
 
 export class socketServer {
-    private rooms: Map<string, Room> = new Map();
+    private rooms: Map<string, Room> = new Map(); //will be cached in future
     private io:Server;
     constructor(io:Server) {
         this.io = io
@@ -13,11 +13,6 @@ export class socketServer {
 
     private handleConnection(socket: Socket) { //Responsible for as handling socket connection methods
         console.log("User connected with socketId: ", socket.id);
-
-        socket.on('hi',(data)=>{
-            this.io.to(socket.id).emit('hello');
-            console.log("User event accepted")
-        })
 
         socket.on(socketEvents.SEND_USER_INFO, (data: { username: string, roomId: string}) => {
             this.handleUserJoin(socket , data.username ,  data.roomId);  
@@ -76,6 +71,5 @@ export class socketServer {
             })
         })
     }
-
 };
 
