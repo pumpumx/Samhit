@@ -16,6 +16,12 @@ const UserSchema = new mongoose.Schema<userSchemaType>({
         enum:["Client" , "Consultant"],
         default:"Client"
     },
+    age:{
+        type:Number,
+        required:true,
+        min:16,
+        max:110,
+    },
     username:{
         type:String,
         unique:true,
@@ -30,6 +36,10 @@ const UserSchema = new mongoose.Schema<userSchemaType>({
         unique:true,
         required:true,
         trim:true,
+    },
+    isEmailVerfied:{
+        type:Boolean,
+        default:false,
     },
     password:{
         type:String,

@@ -5,6 +5,7 @@ export interface userSchemaType extends Document{
     username:string,
     accountType:string,
     email:string,
+    isEmailVerfied:boolean,
     age:number,
     password:string,
     bio:string,

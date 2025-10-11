@@ -54,17 +54,7 @@ export async function serverInitialisation() {
             //Sets the respective user with its socket id 
             // userSocketMap.set(verifiedToken.username, socket.id)  
         
-            socket.on('send-user-info',(data:clientData)=>{
-                userSocketMap.set(data.username,socket.id) //Sets the username to socket ID
-                socketUserMap.set(socket.id , data.username) //Sets the socket id to username
-
-                socket.join(data.roomId) //Responsible for making user join respective rooms
-                
-                socket.to(data.roomId).emit(`${data.username} joined the room`)
-
-                const usersInRoom = io.sockets.adapter.rooms.get(data.roomId)
-                console.log("All users in this specific room" , usersInRoom)
-            })
+            
 
             //All message handler logic
          

@@ -1,0 +1,81 @@
+import { Server, Socket } from "socket.io";
+import { socketEvents } from "./socketEvents.ts";
+import { Room } from "./socketRoom.ts";
+import { socketUser } from "./socketUser.ts";
+
+export class socketServer {
+    private rooms: Map<string, Room> = new Map();
+    private io:Server;
+    constructor(io:Server) {
+        this.io = io
+        this.io.on('connection', (socket) => this.handleConnection(socket));
+    }
+
+    private handleConnection(socket: Socket) { //Responsible for as handling socket connection methods
+        console.log("User connected with socketId: ", socket.id);
+
+        socket.on('hi',(data)=>{
+            this.io.to(socket.id).emit('hello');
+            console.log("User event accepted")
+        })
+
+        socket.on(socketEvents.SEND_USER_INFO, (data: { username: string, roomId: string}) => {
+            this.handleUserJoin(socket , data.username ,  data.roomId);  
+        })
+
+        socket.on(socketEvents.SEND_ANSWER ,(data:{roomId:string , answer:RTCSessionDescriptionInit}) =>{
+            this.handleUserAnswer(socket , data.roomId , data.answer);
+        } ) //Responsible for WebRTC answer
+
+        socket.on(socketEvents.ICE_CANDIDATE , (data:{userRoom:string , iceCandidate:RTCIceCandidateInit })=>{
+            this.handleUserIce(socket , data.userRoom , data.iceCandidate);
+        })
+
+        socket.on(socketEvents.CALL_USER , (data:{userRoom:string , offer:RTCSessionDescriptionInit})=>{
+            this.handleUserCall(socket , data.userRoom , data.offer);
+        })
+
+        socket.on(socketEvents.DISCONNECT , ()=>{
+            this.handleDisconnect(socket);
+        })
+    }
+
+    private handleUserJoin(socket:Socket  , username:string , roomId:string ){
+        let room = this.rooms.get(roomId);
+
+        if(!room){
+            room = new Room(roomId)
+            this.rooms.set(roomId , room);
+        }
+        const user = new socketUser(username ,socket.id , roomId);
+        this.rooms.set(user.username , room);
+        socket.join(roomId);
+
+        socket.to(roomId).emit(`${socketEvents.USER_JOINED_ROOM} ${username}`); //Notify the room member that user has joined the room
+    }
+
+    private handleUserAnswer(socket:Socket , roomId:string  , answer:RTCSessionDescriptionInit){
+        socket.to(roomId).emit(socketEvents.SEND_ANSWER , {answer});
+    }
+
+    private handleUserIce(socket:Socket , roomId:string , iceCandidate:RTCIceCandidateInit){
+        socket.to(roomId).emit(socketEvents.AVAILABLE_CANDIDATE , {iceCandidate})
+    }
+
+    private handleUserCall(socket:Socket , roomId:string , offer:RTCSessionDescriptionInit){
+        socket.to(roomId).emit(socketEvents.INCOMING_CALL , {offer});
+    }
+
+    private handleDisconnect(socket:Socket){
+        this.rooms.forEach((room)=>{
+            room.getUser().forEach((user) => {
+                    if(user.socketId === socket.id){
+                        room.removeUser(user.username);
+                        console.log(`User ${user.username} removed from the room ${room.roomId}`);
+                    }
+            })
+        })
+    }
+
+};
+
