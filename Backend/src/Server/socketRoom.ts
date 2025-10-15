@@ -1,7 +1,5 @@
 import { socketUser } from "./socketUser.ts";
 
-
-
 export class Room{
     private userMap : Map<string,socketUser> = new Map();
     public roomId:string 

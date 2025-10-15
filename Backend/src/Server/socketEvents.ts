@@ -9,5 +9,6 @@ export const socketEvents = {
     RECEIVE_ANSWER:'receive-answer',
     ICE_CANDIDATE:'ice-candidate',
     AVAILABLE_CANDIDATE:'available-candidate',
-    DISCONNECT:'disconnect'
+    DISCONNECT:'disconnect',
+    RECIEVE_ANSWER:'recieve-answer'
 } 

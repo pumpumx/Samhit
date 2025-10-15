@@ -50,7 +50,7 @@ export class socketServer {
     }
 
     private handleUserAnswer(socket:Socket , roomId:string  , answer:RTCSessionDescriptionInit){
-        socket.to(roomId).emit(socketEvents.SEND_ANSWER , {answer});
+        socket.to(roomId).emit(socketEvents.RECEIVE_ANSWER , {answer}); //Sending the answer back to the client
     }
 
     private handleUserIce(socket:Socket , roomId:string , iceCandidate:RTCIceCandidateInit){
@@ -60,7 +60,7 @@ export class socketServer {
     private handleUserCall(socket:Socket , roomId:string , offer:RTCSessionDescriptionInit){
         socket.to(roomId).emit(socketEvents.INCOMING_CALL , {offer});
     }
-
+            
     private handleDisconnect(socket:Socket){
         this.rooms.forEach((room)=>{
             room.getUser().forEach((user) => {

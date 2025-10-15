@@ -1,11 +1,10 @@
 
 export class userDevice {
 
-    private stream: MediaStream | undefined
-
+    private stream: MediaStream | null
 
      constructor() {
-        this.stream = undefined
+        this.stream = null
         this.handleUserVideoStream()
     }
 
@@ -28,14 +27,11 @@ export class userDevice {
         })}
 
     private async useCamera() {
-       try {
          const devices: MediaDeviceInfo[] = await this.getDevices('videoinput');
          if (devices && devices.length > 0) {
              const stream = await this.openCamera(devices[0].deviceId, 720, 720)
              return stream;
          }
-       } catch (error) {
-        console.log("No device available",error)
-       }
+         return null;
     }
 }
