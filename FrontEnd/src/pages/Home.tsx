@@ -1,24 +1,22 @@
 import { useEffect, useRef, useState } from "react";
-import gsap from "gsap";
 import { userStore, useUserProfile } from "@/stores/user.store";
 import { useNavigate } from "react-router-dom";
-
+import { clientSocketMethods } from "@/classes/webRTC";
 
 
 export default function HomePage() {
+
   const cardRef = useRef(null);
   const username = useUserProfile((state)=>state.username)
   const changeUsername = useUserProfile((state)=>state.setUsername)  //later on can apply bloom filter to check for the possibility of a preexisting username 
-  const [roomId, setRoomID] = useState<string | undefined>()
-  const addUser = userStore((state) => state.insertUserIntoUserList)
+  const setRoomId = useUserProfile((state)=>state.setRoomId)
   const navigate = useNavigate()
 
-
-  const handleUserRoomJoin = ()=>{ //First task create a room according to the user room id , there will be an array of user ACCORDING TO THE ROOMID
+  const clientSocket = new clientSocketMethods()
+  
+  const userJoinedRoom = ()=>{
     
   }
-    
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-blue-200 flex items-center justify-center px-4">
       <div
@@ -47,8 +45,7 @@ export default function HomePage() {
               Room ID
             </label>
             <input
-              onChange={(e) => setRoomID(e.target.value)}
-              value={roomId as string}
+              onChange={(e) => setRoomId(e.target.value)}
               id="room"
               type="text"
               placeholder="Enter room ID"

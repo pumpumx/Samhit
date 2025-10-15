@@ -28,12 +28,18 @@ export const userStore = create<userData>((set , get)=>({
 
 interface userProfile{ //Can scale this user profile later if we would like to add more details to the user profile
     username:string,
+    userRoomId:string,
     setUsername:(newUsername : string)=>void
+    setRoomId:(roomId:string)=>void
 }
 
 export const useUserProfile = create<userProfile>((set)=>({ //If the user profile is an object simple loop through to mutate the state
     username:"",
+    userRoomId:"",
     setUsername:(newUsername:string)=>{
         set({username:newUsername})
+    },
+    setRoomId:(roomId:string)=>{
+        set({userRoomId:roomId})
     }
 }))
