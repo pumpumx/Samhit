@@ -12,5 +12,6 @@ export const SocketEvents = {
     SEND_USER_INFO:'send-user-info',
     DISCONNECT:'disconnect',    
     INCOMING_CALL:'incoming-call',
-    SEND_ANSWER:'send-answer'
+    SEND_ANSWER:'send-answer',
+    USER_JOINED_ROOM:'user-joined-room'
 }

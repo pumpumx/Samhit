@@ -4,18 +4,27 @@ import { useNavigate } from "react-router-dom";
 import { clientSocketMethods } from "@/classes/webRTC";
 
 
+
 export default function HomePage() {
 
-  const cardRef = useRef(null);
-  const username = useUserProfile((state)=>state.username)
-  const changeUsername = useUserProfile((state)=>state.setUsername)  //later on can apply bloom filter to check for the possibility of a preexisting username 
-  const setRoomId = useUserProfile((state)=>state.setRoomId)
-  const navigate = useNavigate()
+  const clientSocket = useRef<clientSocketMethods | null>(null)
 
-  const clientSocket = new clientSocketMethods()
+  const cardRef = useRef(null);
+  const username = useUserProfile((state) => state.username)
+  const userRoomId = useUserProfile((state) => state.userRoomId)
+  const changeUsername = useUserProfile((state) => state.setUsername)  //later on can apply bloom filter to check for the possibility of a preexisting username 
+  const setRoomId = useUserProfile((state) => state.setRoomId)
+  const navigate = useNavigate()
   
-  const userJoinedRoom = ()=>{
-    
+  useEffect(()=>{
+    if(!clientSocket.current){
+      clientSocket.current = new clientSocketMethods()
+    }
+  },[])
+
+  const userJoinedRoom = () => {
+    console.log("inside")
+    clientSocket.current?.sendClientInfoToBackend({ username: username, roomId: userRoomId }) //send the user room Id back to the backend
   }
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-blue-200 flex items-center justify-center px-4">
@@ -23,7 +32,7 @@ export default function HomePage() {
         ref={cardRef}
         className="w-full max-w-md shadow-2xl rounded-2xl p-6 bg-white"
       >
-          <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">
+        <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">
           Join a Room
         </h1>
         <form className="space-y-4">
@@ -55,6 +64,7 @@ export default function HomePage() {
           <button
             type="button"
             className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors"
+            onClick={()=>userJoinedRoom()}
           >
             Join
           </button>

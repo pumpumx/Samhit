@@ -61,6 +61,32 @@ export class clientSocketMethods extends webRTCMethods {
 
     //Listening Events
 
+    public sendClientInfoToBackend(data: { username: string, roomId: string }) {
+        this.clientSocket.emit(SocketEvents.SEND_USER_INFO, {
+            username: data.username,
+            roomId: data.roomId
+        })
+    }
+
+    public roomJoinedSuccessfully(data:{username:string , roomId:string}){
+        console.log(`${data.username} joined room ${data.roomId}`)
+    }
+
+    protected sendAnswerToAnotherUser(roomId: string) {
+        this.clientSocket.emit(SocketEvents.SEND_ANSWER)
+    }
+
+    protected sendOfferToAnotherUser(roomId: string) {
+        this.clientSocket.emit(SocketEvents.SEND_OFFER, {
+            roomId: roomId,
+            offer: this.offer
+        })
+    }
+
+    public userDisconnected() {
+        this.clientSocket.emit(SocketEvents.DISCONNECT);
+    }
+
     private SocketHandler() {
         this.clientSocket.on(SocketEvents.RECIEVE_ANSWER, (data: { answer: RTCSessionDescriptionInit }) => {
             this.setAnswerRecievedFromInitiator(data.answer);
@@ -74,31 +100,13 @@ export class clientSocketMethods extends webRTCMethods {
             this.setICECandidate(data.iceCandidate);
         })
 
-        this.clientSocket.on(SocketEvents.DISCONNECT, this.userDisconnected)
-    }
+        this.clientSocket.on(SocketEvents.DISCONNECT, ()=>this.userDisconnected())
 
-    //Sending events
-    private sendClientInfoToBackend(data: { username: string, roomId: string }) {
-        this.clientSocket.emit(SocketEvents.SEND_USER_INFO, {
-            username: data.username,
-
-            roomId: data.roomId
-        });
-    }
-
-    private sendAnswerToAnotherUser(roomId: string) {
-        this.clientSocket.emit(SocketEvents.SEND_ANSWER)
-    }
-
-    private sendOfferToAnotherUser(roomId: string) {
-        this.clientSocket.emit(SocketEvents.SEND_OFFER, {
-            roomId: roomId,
-            offer: this.offer
+        this.clientSocket.on(SocketEvents.USER_JOINED_ROOM , (data:{username:string , roomId:string})=>{
+            this.roomJoinedSuccessfully({username:data.username , roomId:data.roomId});
         })
     }
 
-    private userDisconnected() {
-        this.clientSocket.emit(SocketEvents.DISCONNECT);
-    }
+    //Sending events
 
 }

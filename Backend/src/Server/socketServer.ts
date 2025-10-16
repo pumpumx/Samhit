@@ -15,6 +15,7 @@ export class socketServer {
         console.log("User connected with socketId: ", socket.id);
 
         socket.on(socketEvents.SEND_USER_INFO, (data: { username: string, roomId: string}) => {
+            console.log("User connection recieved")
             this.handleUserJoin(socket , data.username ,  data.roomId);  
         })
 
@@ -35,18 +36,23 @@ export class socketServer {
         })
     }
 
-    private handleUserJoin(socket:Socket  , username:string , roomId:string ){
-        let room = this.rooms.get(roomId);
-
-        if(!room){
-            room = new Room(roomId)
-            this.rooms.set(roomId , room);
-        }
-        const user = new socketUser(username ,socket.id , roomId);
-        this.rooms.set(user.username , room);
-        socket.join(roomId);
-
-        socket.to(roomId).emit(`${socketEvents.USER_JOINED_ROOM} ${username}`); //Notify the room member that user has joined the room
+    private async handleUserJoin(socket:Socket  , username:string , roomId:string ){
+        try {
+            let room = this.rooms.get(roomId);
+    
+            if(!room){
+                room = new Room(roomId)
+                this.rooms.set(roomId , room);
+            }
+            const user = new socketUser(username ,socket.id , roomId);
+            console.log("user",user)
+            room.addUser(user)
+            await socket.join(roomId);
+            console.log(socket.rooms)
+            this.io.to(roomId).emit(socketEvents.USER_JOINED_ROOM,{username,roomId});
+        } catch (error) {
+            console.log("Some error occured while handeling user joined",error)
+        } //Notify the room member that user has joined the room
     }
 
     private handleUserAnswer(socket:Socket , roomId:string  , answer:RTCSessionDescriptionInit){
