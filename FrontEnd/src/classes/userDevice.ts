@@ -1,15 +1,18 @@
 
 export class userDevice {
 
-    private stream: MediaStream | null
+    stream: MediaStream | null
 
-     constructor() {
+    constructor() {
         this.stream = null
-        this.handleUserVideoStream()
     }
 
-    private async handleUserVideoStream(){
-        this.stream = await this.useCamera()
+    async handleUserVideoStream() {
+        if(!this.stream){
+            this.stream = await this.useCamera()
+            return this.stream
+        }
+        this.stream
     }
 
     private async getDevices(type: string) {
@@ -24,14 +27,15 @@ export class userDevice {
                 width: minWidth,
                 height: minHeight
             }
-        })}
+        })
+    }
 
-    private async useCamera() {
-         const devices: MediaDeviceInfo[] = await this.getDevices('videoinput');
-         if (devices && devices.length > 0) {
-             const stream = await this.openCamera(devices[0].deviceId, 720, 720)
-             return stream;
-         }
-         return null;
+    async useCamera():Promise<MediaStream | null>{
+        const devices: MediaDeviceInfo[] = await this.getDevices('videoinput');
+        if (devices && devices.length > 0) {
+            const stream = await this.openCamera(devices[0].deviceId, 720, 720)
+            return stream;
+        }
+        return null;
     }
 }

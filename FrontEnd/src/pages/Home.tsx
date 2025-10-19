@@ -8,17 +8,17 @@ import { clientSocketMethods } from "@/classes/webRTC";
 export default function HomePage() {
 
   const clientSocket = useRef<clientSocketMethods | null>(null)
-
+  const setClientSocketGlobal = userStore((state) => state.setUserClientSocket);
   const cardRef = useRef(null);
   const username = useUserProfile((state) => state.username)
   const userRoomId = useUserProfile((state) => state.userRoomId)
   const changeUsername = useUserProfile((state) => state.setUsername)  //later on can apply bloom filter to check for the possibility of a preexisting username 
-  const setRoomId = useUserProfile((state) => state.setRoomId)
   const navigate = useNavigate()
   
   useEffect(()=>{
     if(!clientSocket.current){
       clientSocket.current = new clientSocketMethods()
+      setClientSocketGlobal(clientSocket.current)    
     }
   },[])
 

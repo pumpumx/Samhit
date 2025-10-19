@@ -1,16 +1,20 @@
+import { clientSocketMethods } from '@/classes/webRTC';
 import {create} from 'zustand'
 
 export interface userData{
     Users:{id:string ,username:string , roomId:string}[];
+    clientSocket:clientSocketMethods | null
     insertUserIntoUserList:(id:string , username:string , roomId:string)=>void,
     removeUser:()=>void;
     isUserAvailable?:()=>void,
     getUserRoom:(username : string)=>string | undefined
+    setUserClientSocket:(socket:clientSocketMethods)=>void
 }
 
 
 export const userStore = create<userData>((set , get)=>({
     Users:[],
+    clientSocket:null,
     insertUserIntoUserList:(id:string , username:string , roomId:string)=>{
         set((state)=>({
             Users:[...state.Users , {id ,username , roomId}]
@@ -22,6 +26,9 @@ export const userStore = create<userData>((set , get)=>({
     getUserRoom:(username : string)=>{ //Return a string value
         const user = get().Users.find((state)=>state.username === username);
         return user?.roomId
+    },
+    setUserClientSocket:(userSocket:clientSocketMethods)=>{
+        set({clientSocket:userSocket});
     }
 }))
 
