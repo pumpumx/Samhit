@@ -25,6 +25,7 @@ export default function HomePage() {
   const userJoinedRoom = () => {
     console.log("inside")
     clientSocket.current?.sendClientInfoToBackend({ username: username, roomId: userRoomId }) //send the user room Id back to the backend
+     navigate(`/room/${userRoomId}`)
   }
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-100 to-blue-200 flex items-center justify-center px-4">

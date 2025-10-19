@@ -73,7 +73,9 @@ export class clientSocketMethods extends webRTCMethods {
     }
 
     protected sendAnswerToAnotherUser(roomId: string) {
-        this.clientSocket.emit(SocketEvents.SEND_ANSWER)
+        this.clientSocket.emit(SocketEvents.SEND_ANSWER , {
+            roomId,
+        })
     }
 
     protected sendOfferToAnotherUser(roomId: string) {
