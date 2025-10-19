@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef} from "react";
 import { userStore, useUserProfile } from "@/stores/user.store";
 import { useNavigate } from "react-router-dom";
 import { clientSocketMethods } from "@/classes/webRTC";
@@ -7,11 +7,12 @@ import { clientSocketMethods } from "@/classes/webRTC";
 
 export default function HomePage() {
 
+  const cardRef = useRef(null)
   const clientSocket = useRef<clientSocketMethods | null>(null)
   const setClientSocketGlobal = userStore((state) => state.setUserClientSocket);
-  const cardRef = useRef(null);
   const username = useUserProfile((state) => state.username)
   const userRoomId = useUserProfile((state) => state.userRoomId)
+  const setRoomId = useUserProfile((state)=>state.setRoomId)
   const changeUsername = useUserProfile((state) => state.setUsername)  //later on can apply bloom filter to check for the possibility of a preexisting username 
   const navigate = useNavigate()
   
