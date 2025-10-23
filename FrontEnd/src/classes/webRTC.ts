@@ -19,8 +19,7 @@ export class webRTCMethods {
          //This will be the first thing that would  return or be signalled to another user
     }
 
-    async createAnswerForInitiator(roomId:string , offer: RTCSessionDescriptionInit) {
-        await this.peer?.setRemoteDescription(new RTCSessionDescription(offer))
+    async createAnswerForInitiator(roomId:string) {
         const answer = await this.peer?.createAnswer();
         await this.peer?.setLocalDescription(answer)
         
@@ -36,7 +35,7 @@ export class webRTCMethods {
     async setOfferRecievedFromAnotherUser(roomId:string , offer: RTCSessionDescriptionInit) {
         await this.peer.setRemoteDescription(offer);
         console.log("Offer set as localDescription")
-        this.createAnswerForInitiator(roomId , offer);
+        this.createAnswerForInitiator(roomId);
     }
 
     async setAnswerRecievedFromInitiator(roomId:string , answer: RTCSessionDescriptionInit) {
