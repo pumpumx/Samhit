@@ -27,8 +27,9 @@ export class socketServer {
             this.handleUserIce(socket , data.userRoom , data.iceCandidate);
         })
 
-        socket.on(socketEvents.CALL_USER , (data:{userRoom:string , offer:RTCSessionDescriptionInit})=>{
-            this.handleUserCall(socket , data.userRoom , data.offer);
+        socket.on(socketEvents.CALL_USER , (data:{roomId:string , offer:RTCSessionDescriptionInit})=>{
+            console.log("Offer recieved from room",data.roomId)
+            this.handleUserCall(socket , data.roomId, data.offer);
         })
 
         socket.on(socketEvents.DISCONNECT , ()=>{
@@ -56,15 +57,16 @@ export class socketServer {
     }
 
     private handleUserAnswer(socket:Socket , roomId:string  , answer:RTCSessionDescriptionInit){
-        socket.to(roomId).emit(socketEvents.RECEIVE_ANSWER , {answer}); //Sending the answer back to the client
+        console.log("answer Recieved sending back to the initiator")
+        socket.to(roomId).emit(socketEvents.RECEIVE_ANSWER , {roomId , answer}); //Sending the answer back to the client
     }
 
     private handleUserIce(socket:Socket , roomId:string , iceCandidate:RTCIceCandidateInit){
-        socket.to(roomId).emit(socketEvents.AVAILABLE_CANDIDATE , {iceCandidate})
+        socket.to(roomId).emit(socketEvents.AVAILABLE_CANDIDATE , {roomId , iceCandidate})
     }
 
     private handleUserCall(socket:Socket , roomId:string , offer:RTCSessionDescriptionInit){
-        socket.to(roomId).emit(socketEvents.INCOMING_CALL , {offer});
+        socket.to(roomId).emit(socketEvents.INCOMING_CALL , {roomId , offer});
     }
             
     private handleDisconnect(socket:Socket){

@@ -10,5 +10,5 @@ export const socketEvents = {
     ICE_CANDIDATE:'ice-candidate',
     AVAILABLE_CANDIDATE:'available-candidate',
     DISCONNECT:'disconnect',
-    RECIEVE_ANSWER:'recieve-answer'
+    RECIEVE_ANSWER:'recieve-answer',
 } 

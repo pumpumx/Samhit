@@ -4,6 +4,8 @@ import {create} from 'zustand'
 export interface userData{
     Users:{id:string ,username:string , roomId:string}[];
     clientSocket:clientSocketMethods | null
+    localPeer:RTCPeerConnection | null,
+    setLocalPeer:(peer:RTCPeerConnection)=>void
     insertUserIntoUserList:(id:string , username:string , roomId:string)=>void,
     removeUser:()=>void;
     isUserAvailable?:()=>void,
@@ -15,6 +17,10 @@ export interface userData{
 export const userStore = create<userData>((set , get)=>({
     Users:[],
     clientSocket:null,
+    localPeer:null,
+    setLocalPeer:(peer:RTCPeerConnection)=>{
+        set({localPeer:peer})
+    },
     insertUserIntoUserList:(id:string , username:string , roomId:string)=>{
         set((state)=>({
             Users:[...state.Users , {id ,username , roomId}]

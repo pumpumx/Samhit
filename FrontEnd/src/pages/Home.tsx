@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { clientSocketMethods } from "@/classes/webRTC";
 
 
-
 export default function HomePage() {
 
   const cardRef = useRef(null)
@@ -18,8 +17,9 @@ export default function HomePage() {
   
   useEffect(()=>{
     if(!clientSocket.current){
-      clientSocket.current = new clientSocketMethods()
+      clientSocket.current = clientSocketMethods.getInstance()
       setClientSocketGlobal(clientSocket.current)    
+      console.log(clientSocket)
     }
   },[])
 
@@ -44,7 +44,7 @@ export default function HomePage() {
             </label>
             <input
               onChange={(e) => changeUsername(e.target.value)}
-              value={username as string}
+              value={username}
               id="email"
               type="text"
               placeholder="Enter your username"
@@ -55,8 +55,9 @@ export default function HomePage() {
             <label htmlFor="room" className="block text-sm font-medium text-gray-700">
               Room ID
             </label>
-            <input
+            <input  
               onChange={(e) => setRoomId(e.target.value)}
+              value={userRoomId}
               id="room"
               type="text"
               placeholder="Enter room ID"

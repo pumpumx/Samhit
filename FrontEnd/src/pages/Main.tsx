@@ -1,25 +1,73 @@
 import { userDevice } from "@/classes/userDevice";
 import { webRTCMethods } from "@/classes/webRTC";
+import { userStore, useUserProfile } from "@/stores/user.store";
 import { useEffect, useRef, useState } from "react";
 
 
+export function useLocalPeer() {
+
+    const clientSocket = userStore((state) => state.clientSocket)
+    const setLocalPeer = userStore((state) => state.setLocalPeer) //I dont even think that i would need a peer but it's fine guess i'll remove it later on.
+    const userRoomId = useUserProfile((state) => state.userRoomId)
+    const peer = userStore((state) => state.localPeer)
+
+    useEffect(() => {
+
+        let isMounted = true //Help's inorder to avoid multiple offers being sent
+        const peerMethods = async () => {
+            const peerHandler = new webRTCMethods()
+            setLocalPeer(peerHandler.peer)
+            console.log("Creating offer....")
+            
+
+            const offer = await peerHandler.createOfferForReciever()
+            if(!isMounted) return;
+            console.log("User offer", offer)
+            console.log("offer Created...")
+            clientSocket?.sendOfferToAnotherUser(offer, userRoomId)
+        }
+
+        peerMethods()
+
+        return ()=>{
+            isMounted = false
+        }
+    }, [userRoomId])
+
+    return peer;
+}
+
 export default function GroupVideoCallUI() { //Will make it remote peer too lately!!
 
-    const peer = new webRTCMethods()
-    const videoRef = useRef<HTMLVideoElement | null>(null);
+    const localVideoRef = useRef<HTMLVideoElement | null>(null);
+    const remoteStreamRef = useRef<HTMLVideoElement | null>(null);
     const [stream, setStream] = useState<MediaStream | null>(null)
+    const peer = useLocalPeer() //Responsible for managing the peer setting 
 
-    const handleUserMedia = () => {}
+    //UseEffect for remoteStreams 
+
+    useEffect(() => {
+        if (peer) {
+            peer.ontrack = (event:RTCTrackEvent) => {
+                if(remoteStreamRef && remoteStreamRef.current)
+                remoteStreamRef.current.srcObject = event.streams[0]
+            }
+        }
+
+        return ()=>{
+            peer?.close()
+        }
+    },[peer])
 
     useEffect(() => {
         const streamStart = async () => {
             const cameraStream = new userDevice()
-            const newStream:MediaStream | null = await cameraStream.handleUserVideoStream()
-            setStream(newStream);
-
-            if(videoRef.current){
-                videoRef.current.srcObject = stream
+            const newStream: MediaStream | null = await cameraStream.handleUserVideoStream()
+            if (localVideoRef.current) {
+                localVideoRef.current.srcObject = newStream
             }
+
+            setStream(newStream)
         }
 
         streamStart()
@@ -30,10 +78,13 @@ export default function GroupVideoCallUI() { //Will make it remote peer too late
     }, [])
 
     useEffect(() => {
-        if (videoRef.current && stream) {
-            videoRef.current.srcObject = stream;
+        if (localVideoRef.current && stream) {
+            localVideoRef.current.srcObject = stream;
+            stream.getTracks().forEach((track)=>{
+                peer?.addTrack(track, stream)
+            })
         }
-        console.log(videoRef)
+        console.log(localVideoRef)
     }, [stream])
 
     //Used to listen to certain events
@@ -42,7 +93,8 @@ export default function GroupVideoCallUI() { //Will make it remote peer too late
             <h1 className="text-3xl font-bold mb-6 text-center tracking-tight">Group Video Call</h1>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 ">
                 {/* Here the user stream feed will be displayed */}
-                <video ref={videoRef} autoPlay playsInline className="w-[600px] h-[400px] bg-amber-300"></video>
+                <video ref={localVideoRef} autoPlay playsInline className="w-[600px] h-[400px] bg-green-400 "></video> {/* Local Stream */}
+                <video ref={remoteStreamRef} autoPlay playsInline className="w-[600px] h-[400px] bg-amber-300 "></video> {/* Remote stream */}
             </div>
 
             <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white/10 backdrop-blur-lg border border-white/20 rounded-full px-8 py-4 shadow-xl flex gap-6 items-center">
