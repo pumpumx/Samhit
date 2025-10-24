@@ -32,6 +32,11 @@ export class socketServer {
             this.handleUserCall(socket , data.roomId, data.offer);
         })
 
+        socket.on(socketEvents.CHECK_POLITE , (data:{roomId:string})=>{
+            console.log("Checking for politeness")
+            this.checkWhetherIsPolite(socket ,data.roomId );
+        })
+
         socket.on(socketEvents.DISCONNECT , ()=>{
             this.handleDisconnect(socket);
         })
@@ -61,6 +66,19 @@ export class socketServer {
         socket.to(roomId).emit(socketEvents.RECEIVE_ANSWER , {roomId , answer}); //Sending the answer back to the client
     }
 
+    private checkWhetherIsPolite( socket:Socket , roomId:string){
+        const room = this.io.sockets.adapter.rooms.get(`${roomId}`)
+        let isPolite;
+        if(room && room.size == 1){
+            isPolite = true;
+            console.log("Emmiting polite value")
+            socket.emit(socketEvents.CHECK_POLITE_RESULT , {isPolite})
+        }
+        else{
+            isPolite = false;
+            socket.emit(socketEvents.CHECK_POLITE_RESULT , {isPolite})
+        }
+    }
     private handleUserIce(socket:Socket , roomId:string , iceCandidate:RTCIceCandidateInit){
         socket.to(roomId).emit(socketEvents.AVAILABLE_CANDIDATE , {roomId , iceCandidate})
     }

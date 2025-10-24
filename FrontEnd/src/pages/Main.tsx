@@ -7,7 +7,6 @@ import { useEffect, useRef, useState } from "react";
 export function useLocalPeer() {
 
     const clientSocket = userStore((state) => state.clientSocket)
-    const setLocalPeer = userStore((state) => state.setLocalPeer) //I dont even think that i would need a peer but it's fine guess i'll remove it later on.
     const userRoomId = useUserProfile((state) => state.userRoomId)
     const peer = userStore((state) => state.localPeer)
 
@@ -15,13 +14,14 @@ export function useLocalPeer() {
 
         let isMounted = true //Help's inorder to avoid multiple offers being sent
         const peerMethods = async () => {
-            const peerHandler = new webRTCMethods()
-            setLocalPeer(peerHandler.peer)
-            console.log("Creating offer....")
-            
+            const peerHandler = webRTCMethods.getRTCInstance()
 
+            //After this i should call polite socket
+            console.log("Creating offer....")
+            console.log(webRTCMethods.isPolite)
             const offer = await peerHandler.createOfferForReciever()
-            if(!isMounted) return;
+            console.log("Peer handler", peerHandler.peer.localDescription?.sdp)
+            if (!isMounted) return;
             console.log("User offer", offer)
             console.log("offer Created...")
             clientSocket?.sendOfferToAnotherUser(offer, userRoomId)
@@ -29,7 +29,7 @@ export function useLocalPeer() {
 
         peerMethods()
 
-        return ()=>{
+        return () => {
             isMounted = false
         }
     }, [userRoomId])
@@ -48,16 +48,16 @@ export default function GroupVideoCallUI() { //Will make it remote peer too late
 
     useEffect(() => {
         if (peer) {
-            peer.ontrack = (event:RTCTrackEvent) => {
-                if(remoteStreamRef && remoteStreamRef.current)
-                remoteStreamRef.current.srcObject = event.streams[0]
+            peer.ontrack = (event: RTCTrackEvent) => {
+                if (remoteStreamRef && remoteStreamRef.current)
+                    remoteStreamRef.current.srcObject = event.streams[0]
             }
         }
 
-        return ()=>{
+        return () => {
             peer?.close()
         }
-    },[peer])
+    }, [peer])
 
     useEffect(() => {
         const streamStart = async () => {
@@ -80,7 +80,7 @@ export default function GroupVideoCallUI() { //Will make it remote peer too late
     useEffect(() => {
         if (localVideoRef.current && stream) {
             localVideoRef.current.srcObject = stream;
-            stream.getTracks().forEach((track)=>{
+            stream.getTracks().forEach((track) => {
                 peer?.addTrack(track, stream)
             })
         }

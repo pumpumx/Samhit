@@ -11,4 +11,6 @@ export const socketEvents = {
     AVAILABLE_CANDIDATE:'available-candidate',
     DISCONNECT:'disconnect',
     RECIEVE_ANSWER:'recieve-answer',
+    CHECK_POLITE:'check-polite',
+    CHECK_POLITE_RESULT:'check-polite-result'
 } 
